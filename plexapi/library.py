@@ -766,9 +766,10 @@ class MovieSection(LibrarySection):
     CONTENT_TYPE = 'video'
 
     def collection(self, **kwargs):
-        """ Returns a list of collections from this library section. """
-        key = '/library/sections/%s/collections' % self.key
-        return self.fetchItems(key, **kwargs)
+        """ Returns a list of collections from this library section.
+            See description of :func:`plexapi.library.LibrarySection.search()` for details about filtering / sorting
+        """
+        return self.search(libtype='collection', **kwargs)
 
     def playlist(self, **kwargs):
         """ Returns a list of playlists from this library section. """
@@ -852,9 +853,10 @@ class ShowSection(LibrarySection):
         return self.search(sort='addedAt:desc', libtype=libtype, maxresults=maxresults)
 
     def collection(self, **kwargs):
-        """ Returns a list of collections from this library section. """
-        key = '/library/sections/%s/collections' % self.key
-        return self.fetchItems(key, **kwargs)
+        """ Returns a list of collections from this library section.
+            See description of :func:`plexapi.library.LibrarySection.search()` for details about filtering / sorting
+        """
+        return self.search(libtype='collection', **kwargs)
 
     def playlist(self, **kwargs):
         """ Returns a list of playlists from this library section. """
@@ -939,9 +941,10 @@ class MusicSection(LibrarySection):
         return self.search(libtype='track', **kwargs)
 
     def collection(self, **kwargs):
-        """ Returns a list of collections from this library section. """
-        key = '/library/sections/%s/collections' % self.key
-        return self.fetchItems(key, **kwargs)
+        """ Returns a list of collections from this library section.
+            See description of :func:`plexapi.library.LibrarySection.search()` for details about filtering / sorting
+        """
+        return self.search(libtype='collection', **kwargs)
 
     def playlist(self, **kwargs):
         """ Returns a list of playlists from this library section. """
