@@ -219,7 +219,7 @@ def test_library_and_section_search_for_movie(plex):
 
 
 def test_library_Collection_modeUpdate(collection):
-    mode_dict = {"default": "-2", "hide": "0", "hideItems": "1", "showItems": "2"}
+    mode_dict = {"default": "-1", "hide": "0", "hideItems": "1", "showItems": "2"}
     for key, value in mode_dict.items():
         collection.modeUpdate(key)
         collection.reload()
@@ -236,6 +236,18 @@ def test_library_Colletion_sortRelease(collection):
     collection.sortUpdate(sort="release")
     collection.reload()
     assert collection.collectionSort == "0"
+
+
+def test_library_Colletion_edit(collection):
+    edits = {'titleSort.value': 'New Title Sort', 'titleSort.locked': 1}
+    collectionTitleSort = collection.titleSort
+    collection.edit(**edits)
+    collection.reload()
+    for field in collection.fields:
+        if field.name == 'titleSort':
+            assert collection.titleSort == 'New Title Sort'
+            assert field.locked is True
+    collection.edit(**{'titleSort.value': collectionTitleSort, 'titleSort.locked': 0})
 
 
 def test_search_with_weird_a(plex):
