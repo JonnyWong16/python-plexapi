@@ -148,7 +148,7 @@ def searchType(libtype):
             libtype (str): LibType to lookup (movie, show, season, episode, artist, album, track,
                                               collection)
         Raises:
-            :class:`plexapi.exceptions.NotFound`: Unknown libtype
+            :exc:`plexapi.exceptions.NotFound`: Unknown libtype
     """
     libtype = compat.ustr(libtype)
     if libtype in [compat.ustr(v) for v in SEARCHTYPES.values()]:
