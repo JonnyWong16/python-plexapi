@@ -83,15 +83,17 @@ jobs:
         pip install -r requirements_dev.txt
         pip install -e .
 
+    - name: Set Plex token
+      if: matrix.plex == 'claimed'
+      run: |
+        echo "PLEXAPI_AUTH_SERVER_TOKEN=${{ secrets.PLEXAPI_AUTH_SERVER_TOKEN }}" >> $GITHUB_ENV
+
     - name: Bootstrap Plex server (${{ matrix.plex }})
-      env:
-        PLEXAPI_AUTH_MYPLEX_USERNAME: ${{ secrets.PLEXAPI_AUTH_MYPLEX_USERNAME }}
-        PLEXAPI_AUTH_MYPLEX_PASSWORD: ${{ secrets.PLEXAPI_AUTH_MYPLEX_PASSWORD }}
       run: |
         python \
           -u tools/plex-bootstraptest.py \
           --destination plex \
-          --advertise-ip=127.0.0.1 \
+          --advertise-ip 127.0.0.1 \
           --bootstrap-timeout 540 \
           --docker-tag ${{ env.PLEX_CONTAINER_TAG }} \
           --${{ matrix.plex }}
@@ -124,7 +126,7 @@ jobs:
           tests/test_sync.py
 
     - name: Unlink PMS from MyPlex account
-      if: matrix.plex == 'claimed'
+      if: matrix.plex == 'claimed' && always()
       run: python -u tools/plex-teardowntest.py
 
     - name: Upload coverage artifact
