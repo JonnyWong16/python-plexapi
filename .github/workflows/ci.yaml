@@ -31,8 +31,8 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('requirements_dev.txt') }}
-        restore-keys: ${{ runner.os }}-${{ matrix.python-version }}-pip-
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements_dev.txt') }}
+        restore-keys: ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
@@ -56,7 +56,7 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
         plex: [unclaimed, claimed]
-        isMaster: ${{ github.ref == 'refs/heads/master' }}
+        isMaster: [${{ github.ref == 'refs/heads/master' }}]
         exclude:
           - isMaster: false
             plex: claimed
@@ -123,7 +123,7 @@ jobs:
           tests/test_sync.py
 
     - name: Unlink PMS from MyPlex account
-      if: matrix.isMaster && matrix.plex == 'claimed'
+      if: matrix.plex == 'claimed'
       run: python -u tools/plex-teardowntest.py
 
     - name: Upload coverage artifact
