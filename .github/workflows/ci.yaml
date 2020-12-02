@@ -84,14 +84,12 @@ jobs:
         pip install -e .
 
     - name: Bootstrap Plex server (${{ matrix.plex }})
-      env:
-        PLEXAPI_AUTH_MYPLEX_USERNAME: ${{ secrets.PLEXAPI_AUTH_MYPLEX_USERNAME }}
-        PLEXAPI_AUTH_MYPLEX_PASSWORD: ${{ secrets.PLEXAPI_AUTH_MYPLEX_PASSWORD }}
       run: |
         python \
           -u tools/plex-bootstraptest.py \
+          --token ${{ secrets.PLEXAPI_AUTH_MYPLEX_TOKEN }}
           --destination plex \
-          --advertise-ip=127.0.0.1 \
+          --advertise-ip 127.0.0.1 \
           --bootstrap-timeout 540 \
           --docker-tag ${{ env.PLEX_CONTAINER_TAG }} \
           --${{ matrix.plex }}
