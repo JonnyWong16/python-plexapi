@@ -13,8 +13,6 @@ on:
 
 env:
   DEFAULT_PYTHON: 3.7
-  PLEXAPI_AUTH_SERVER_BASEURL: http://127.0.0.1:32400
-  PLEX_CONTAINER_TAG: latest
 
 jobs:
   lint-flake8:
@@ -63,6 +61,9 @@ jobs:
         exclude:
           - isMaster: false
             plex: claimed
+    env:
+      PLEXAPI_AUTH_SERVER_BASEURL: http://127.0.0.1:32400
+      PLEX_CONTAINER_TAG: latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -132,7 +133,6 @@ jobs:
       run: python -u tools/plex-teardowntest.py
 
     - name: Upload coverage artifact
-      if: always()
       uses: actions/upload-artifact@v2
       with:
         name: coverage-${{ matrix.python-version }}-${{ matrix.plex }}
