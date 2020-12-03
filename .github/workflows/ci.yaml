@@ -111,7 +111,7 @@ jobs:
       id: docker-cache
       uses: actions/cache@v2
       with:
-        path: ~/.cache/docker
+        path: ~/.cache/docker/plexinc
         key: ${{ runner.os }}-docker-pms-${{ steps.docker-digest.outputs.digest }}
 
     - name: Pull PMS Docker image
