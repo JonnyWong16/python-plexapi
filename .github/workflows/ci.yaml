@@ -92,7 +92,8 @@ jobs:
       run: |
         echo "PLEXAPI_AUTH_SERVER_TOKEN=${{ secrets.PLEXAPI_AUTH_SERVER_TOKEN }}" >> $GITHUB_ENV
 
-    - run: mkdir -p ~/.cache/docker
+    - name: Make Docker cache directory
+      run: mkdir -p ~/.cache/docker
 
     - name: Cache Docker image
       id: docker-cache
@@ -101,12 +102,14 @@ jobs:
         path: ~/.cache/docker
         key: ${{ runner.os }}-docker-plex-${{ env.PLEX_CONTAINER_TAG }}
 
-    - if: steps.docker-cache.outputs.cache-hit != 'true'
+    - name: Pull Plex Docker image
+      if: steps.docker-cache.outputs.cache-hit != 'true'
       run: |
         docker pull plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
         docker save -o ~/.cache/docker/plex-${{ env.PLEX_CONTAINER_TAG }}.tar plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
 
-    - if: steps.docker-cache.outputs.cache-hit == 'true'
+    - name: Load Plex Docker image from cache
+      if: steps.docker-cache.outputs.cache-hit == 'true'
       run: |
         docker load -i ~/.cache/docker/plex-${{ env.PLEX_CONTAINER_TAG }}.tar
 
