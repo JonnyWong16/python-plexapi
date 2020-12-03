@@ -96,7 +96,7 @@ jobs:
 
     - name: Cache Docker image
       id: docker-cache
-      uses: action/cache@v2
+      uses: actions/cache@v2
       with:
         path: ~/.cache/docker
         key: ${{ runner.os }}-docker-plex-${{ env.PLEX_CONTAINER_TAG }}
