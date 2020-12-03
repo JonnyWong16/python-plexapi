@@ -20,6 +20,12 @@ jobs:
       with:
         python-version: ${{ env.DEFAULT_PYTHON }}
 
+    - name: Install dependencies and build
+      run: |
+        pip install -U pip
+        pip install setuptools wheel
+        python setup.py sdist bdist_wheel
+        
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
