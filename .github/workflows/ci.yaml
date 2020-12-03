@@ -7,6 +7,7 @@ on:
   push:
     branches: 
       - master
+      - add_github_actions
   pull_request:
     branches:
       - master
@@ -90,6 +91,24 @@ jobs:
       if: matrix.plex == 'claimed'
       run: |
         echo "PLEXAPI_AUTH_SERVER_TOKEN=${{ secrets.PLEXAPI_AUTH_SERVER_TOKEN }}" >> $GITHUB_ENV
+
+    - run: mkdir -p ~/.cache/docker
+
+    - name: Cache Docker image
+      id: docker-cache
+      uses: action/cache@v2
+      with:
+        path: ~/.cache/docker
+        key: ${{ runner.os }}-docker-plex-${{ env.PLEX_CONTAINER_TAG }}
+
+    - if: steps.docker-cache.outputs.cache-hit != 'true'
+      run: |
+        docker pull plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
+        docker save -o ~/.cache/docker/plex-${{ env.PLEX_CONTAINER_TAG }}.tar plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
+
+    - if: steps.docker-cache.outputs.cache-hit == 'true'
+      run: |
+        docker load -i ~/.cache/docker/plex-${{ env.PLEX_CONTAINER_TAG }}.tar
 
     - name: Bootstrap Plex server (${{ matrix.plex }})
       run: |
