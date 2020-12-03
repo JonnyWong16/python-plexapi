@@ -91,7 +91,7 @@ jobs:
     - name: Get PMS Docker image digest
       id: docker-digest
       run: |
-        mkdir -p ~/.cache/docker
+        mkdir -p ~/.cache/docker/${{ env.PLEX_CONTAINER }}
         echo "Image: ${{ env.PLEX_CONTAINER }}"
         echo "Tag: ${{ env.PLEX_CONTAINER_TAG }}"
         token=$(curl \
