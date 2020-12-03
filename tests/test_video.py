@@ -66,6 +66,8 @@ def test_video_Movie_getStreamURL(movie, account):
 def test_video_Movie_isFullObject_and_reload(plex):
     movie = plex.library.section("Movies").get("Sita Sings the Blues")
     assert movie.isFullObject() is False
+    movie.reload(checkFiles=False)
+    assert movie.isFullObject() is False
     movie.reload()
     assert movie.isFullObject() is True
     movie_via_search = plex.library.search(movie.title)[0]
@@ -909,7 +911,7 @@ def test_video_edits_locked(movie, episode):
     for field in movie.fields:
         if field.name == 'titleSort':
             assert movie.titleSort == 'New Title Sort'
-            assert field.locked == True
+            assert field.locked is True
     movie.edit(**{'titleSort.value': movieTitleSort, 'titleSort.locked': 0})
 
     episodeTitleSort = episode.titleSort
@@ -918,7 +920,7 @@ def test_video_edits_locked(movie, episode):
     for field in episode.fields:
         if field.name == 'titleSort':
             assert episode.titleSort == 'New Title Sort'
-            assert field.locked == True
+            assert field.locked is True
     episode.edit(**{'titleSort.value': episodeTitleSort, 'titleSort.locked': 0})
 
 

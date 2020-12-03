@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import base64
 import logging
 import os
 import re
@@ -146,7 +147,7 @@ def searchType(libtype):
             libtype (str): LibType to lookup (movie, show, season, episode, artist, album, track,
                                               collection)
         Raises:
-            :class:`plexapi.exceptions.NotFound`: Unknown libtype
+            :exc:`plexapi.exceptions.NotFound`: Unknown libtype
     """
     libtype = str(libtype)
     if libtype in [str(v) for v in SEARCHTYPES.values()]:
@@ -367,6 +368,10 @@ def getMyPlexAccount(opts=None):  # pragma: no cover
     if config_username and config_password:
         print('Authenticating with Plex.tv as %s..' % config_username)
         return MyPlexAccount(config_username, config_password)
+    config_token = CONFIG.get('auth.server_token')
+    if config_token:
+        print('Authenticating with Plex.tv with token')
+        return MyPlexAccount(token=config_token)
     # 3. Prompt for username and password on the command line
     username = input('What is your plex.tv username: ')
     password = getpass('What is your plex.tv password: ')
@@ -411,3 +416,7 @@ def getAgentIdentifier(section, agent):
         agents += identifiers
     raise NotFound('Couldnt find "%s" in agents list (%s)' %
                    (agent, ', '.join(agents)))
+
+
+def base64str(text):
+    return base64.b64encode(text.encode('utf-8')).decode('utf-8')

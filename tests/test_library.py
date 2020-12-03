@@ -139,6 +139,10 @@ def test_library_MovieSection_update(movies):
     movies.update()
 
 
+def test_library_MovieSection_update_path(movies):
+    movies.update(path=movies.locations[0])
+
+
 def test_library_ShowSection_all(tvshows):
     assert len(tvshows.all(title__iexact="The 100"))
 
@@ -242,7 +246,7 @@ def test_library_editAdvanced_default(movies):
 
 
 def test_library_Collection_modeUpdate(collection):
-    mode_dict = {"default": "-2", "hide": "0", "hideItems": "1", "showItems": "2"}
+    mode_dict = {"default": "-1", "hide": "0", "hideItems": "1", "showItems": "2"}
     for key, value in mode_dict.items():
         collection.modeUpdate(key)
         collection.reload()
@@ -269,7 +273,7 @@ def test_library_Colletion_edit(collection):
     for field in collection.fields:
         if field.name == 'titleSort':
             assert collection.titleSort == 'New Title Sort'
-            assert field.locked == True
+            assert field.locked is True
     collection.edit(**{'titleSort.value': collectionTitleSort, 'titleSort.locked': 0})
 
 

@@ -5,14 +5,14 @@ name: CI
 
 on:
   push:
-    branches: [ master, add_github_actions ]
+    branches: 
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
 
 env:
   DEFAULT_PYTHON: 3.7
-  PLEXAPI_AUTH_SERVER_BASEURL: http://127.0.0.1:32400
-  PLEX_CONTAINER_TAG: latest
 
 jobs:
   lint-flake8:
@@ -61,6 +61,9 @@ jobs:
         exclude:
           - isMaster: false
             plex: claimed
+    env:
+      PLEXAPI_AUTH_SERVER_BASEURL: http://127.0.0.1:32400
+      PLEX_CONTAINER_TAG: latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -83,11 +86,15 @@ jobs:
         pip install -r requirements_dev.txt
         pip install -e .
 
+    - name: Set Plex token
+      if: matrix.plex == 'claimed'
+      run: |
+        echo "PLEXAPI_AUTH_SERVER_TOKEN=${{ secrets.PLEXAPI_AUTH_SERVER_TOKEN }}" >> $GITHUB_ENV
+
     - name: Bootstrap Plex server (${{ matrix.plex }})
       run: |
         python \
           -u tools/plex-bootstraptest.py \
-          --token ${{ secrets.PLEXAPI_AUTH_MYPLEX_TOKEN }}
           --destination plex \
           --advertise-ip 127.0.0.1 \
           --bootstrap-timeout 540 \
@@ -122,7 +129,7 @@ jobs:
           tests/test_sync.py
 
     - name: Unlink PMS from MyPlex account
-      if: matrix.plex == 'claimed'
+      if: matrix.plex == 'claimed' && always()
       run: python -u tools/plex-teardowntest.py
 
     - name: Upload coverage artifact
@@ -135,6 +142,7 @@ jobs:
     name: Process Test Coverage
     runs-on: ubuntu-latest
     needs: plexapi-tests
+    if: always()
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -160,23 +168,3 @@ jobs:
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
-
-  pypi:
-    name: Publish to PyPI
-    runs-on: ubuntu-latest
-    needs: [plexapi-tests, coverage]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Python ${{ env.DEFAULT_PYTHON }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ env.DEFAULT_PYTHON }}
-
-    - name: Publish to PyPI
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_TOKEN }}
