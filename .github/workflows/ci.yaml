@@ -90,6 +90,7 @@ jobs:
     - name: Get PMS Docker image digest
       id: docker-digest
       run: |
+        mkdir -p ~/.cache/docker
         token=$(curl \
           --silent \
           "https://auth.docker.io/token?scope=repository:plexinc/pms-docker:pull&service=registry.docker.io" \
