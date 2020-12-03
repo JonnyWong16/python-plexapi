@@ -101,6 +101,7 @@ jobs:
           --header "Authorization: Bearer $token" \
           "https://registry-1.docker.io/v2/plexinc/pms-docker/manifests/${{ env.PLEX_CONTAINER_TAG }}" \
           | jq -r '.config.digest')
+        echo "plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }} digest: $digest"
         echo ::set-output name=digest::$digest
 
     - name: Cache PMS Docker image
@@ -115,6 +116,7 @@ jobs:
       run: |
         docker pull plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
         docker save -o ~/.cache/docker/pms-docker-${{ env.PLEX_CONTAINER_TAG }}.tar plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
+        echo "Saved image: plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}"
 
     - name: Load PMS Docker image
       if: steps.docker-cache.outputs.cache-hit == 'true'
