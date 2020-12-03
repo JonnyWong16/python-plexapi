@@ -87,31 +87,29 @@ jobs:
         pip install -r requirements_dev.txt
         pip install -e .
 
-    - name: Set Plex token
-      if: matrix.plex == 'claimed'
-      run: |
-        echo "PLEXAPI_AUTH_SERVER_TOKEN=${{ secrets.PLEXAPI_AUTH_SERVER_TOKEN }}" >> $GITHUB_ENV
-
-    - name: Make Docker cache directory
-      run: mkdir -p ~/.cache/docker
-
-    - name: Cache Docker image
+    - name: Cache PMS Docker image
       id: docker-cache
       uses: actions/cache@v2
       with:
         path: ~/.cache/docker
         key: ${{ runner.os }}-docker-plex-${{ env.PLEX_CONTAINER_TAG }}
 
-    - name: Pull Plex Docker image
-      if: steps.docker-cache.outputs.cache-hit != 'true'
-      run: |
-        docker pull plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
-        docker save -o ~/.cache/docker/plex-${{ env.PLEX_CONTAINER_TAG }}.tar plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
-
-    - name: Load Plex Docker image from cache
+    - name: Load PMS Docker image from cache
       if: steps.docker-cache.outputs.cache-hit == 'true'
       run: |
         docker load -i ~/.cache/docker/plex-${{ env.PLEX_CONTAINER_TAG }}.tar
+
+    - name: Pull PMS Docker image
+      run: |
+        status=$(docker pull plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }})
+        if [[ $status != *"up to date"* ]]; then
+            docker save -o ~/.cache/docker/plex-${{ env.PLEX_CONTAINER_TAG }}.tar plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
+        fi
+
+    - name: Set Plex token
+      if: matrix.plex == 'claimed'
+      run: |
+        echo "PLEXAPI_AUTH_SERVER_TOKEN=${{ secrets.PLEXAPI_AUTH_SERVER_TOKEN }}" >> $GITHUB_ENV
 
     - name: Bootstrap Plex server (${{ matrix.plex }})
       run: |
