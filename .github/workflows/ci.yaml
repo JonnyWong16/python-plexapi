@@ -87,24 +87,38 @@ jobs:
         pip install -r requirements_dev.txt
         pip install -e .
 
+    - name: Get PMS Docker image digest
+      id: docker-digest
+      run: |
+        token=$(curl \
+          --silent \
+          "https://auth.docker.io/token?scope=repository:plexinc/pms-docker:pull&service=registry.docker.io" \
+          | jq -r '.token')
+        digest=$(curl \
+          --silent \
+          --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+          --header "Authorization: Bearer $token" \
+          "https://registry-1.docker.io/v2/plexinc/pms-docker/manifests/${{ env.PLEX_CONTAINER_TAG }}" \
+          | jq -r '.config.digest')
+        echo ::set-output name=digest::$digest
+
     - name: Cache PMS Docker image
       id: docker-cache
       uses: actions/cache@v2
       with:
         path: ~/.cache/docker
-        key: ${{ runner.os }}-docker-plex-${{ env.PLEX_CONTAINER_TAG }}
-
-    - name: Load PMS Docker image from cache
-      if: steps.docker-cache.outputs.cache-hit == 'true'
-      run: |
-        docker load -i ~/.cache/docker/plex-${{ env.PLEX_CONTAINER_TAG }}.tar
+        key: ${{ runner.os }}-docker-pms-${{ steps.docker-digest.outputs.digest }}
 
     - name: Pull PMS Docker image
+      if: steps.docker-cache.outputs.cache-hit != 'true'
       run: |
-        status=$(docker pull plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }})
-        if [[ $status != *"up to date"* ]]; then
-            docker save -o ~/.cache/docker/plex-${{ env.PLEX_CONTAINER_TAG }}.tar plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
-        fi
+        docker pull plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
+        docker save -o ~/.cache/docker/pms-docker-${{ env.PLEX_CONTAINER_TAG }}.tar plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
+
+    - name: Load PMS Docker image
+      if: steps.docker-cache.outputs.cache-hit == 'true'
+      run: |
+        docker load -i ~/.cache/docker/pms-docker-${{ env.PLEX_CONTAINER_TAG }}.tar
 
     - name: Set Plex token
       if: matrix.plex == 'claimed'
