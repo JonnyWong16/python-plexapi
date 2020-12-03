@@ -64,6 +64,7 @@ jobs:
             plex: claimed
     env:
       PLEXAPI_AUTH_SERVER_BASEURL: http://127.0.0.1:32400
+      PLEX_CONTAINER: plexinc/pms-docker
       PLEX_CONTAINER_TAG: latest
     steps:
     - name: Checkout code
@@ -91,17 +92,19 @@ jobs:
       id: docker-digest
       run: |
         mkdir -p ~/.cache/docker
+        echo "Image: ${{ env.PLEX_CONTAINER }}"
+        echo "Tag: ${{ env.PLEX_CONTAINER_TAG }}"
         token=$(curl \
           --silent \
-          "https://auth.docker.io/token?scope=repository:plexinc/pms-docker:pull&service=registry.docker.io" \
+          "https://auth.docker.io/token?scope=repository:${{ env.PLEX_CONTAINER }}:pull&service=registry.docker.io" \
           | jq -r '.token')
         digest=$(curl \
           --silent \
           --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
           --header "Authorization: Bearer $token" \
-          "https://registry-1.docker.io/v2/plexinc/pms-docker/manifests/${{ env.PLEX_CONTAINER_TAG }}" \
+          "https://registry-1.docker.io/v2/${{ env.PLEX_CONTAINER }}/manifests/${{ env.PLEX_CONTAINER_TAG }}" \
           | jq -r '.config.digest')
-        echo "plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }} digest: $digest"
+        echo "Digest: $digest"
         echo ::set-output name=digest::$digest
 
     - name: Cache PMS Docker image
@@ -114,14 +117,14 @@ jobs:
     - name: Pull PMS Docker image
       if: steps.docker-cache.outputs.cache-hit != 'true'
       run: |
-        docker pull plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
-        docker save -o ~/.cache/docker/pms-docker-${{ env.PLEX_CONTAINER_TAG }}.tar plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}
-        echo "Saved image: plexinc/pms-docker:${{ env.PLEX_CONTAINER_TAG }}"
+        docker pull ${{ env.PLEX_CONTAINER }}:${{ env.PLEX_CONTAINER_TAG }}
+        docker save -o ~/.cache/docker/${{ env.PLEX_CONTAINER }}-${{ env.PLEX_CONTAINER_TAG }}.tar ${{ env.PLEX_CONTAINER }}:${{ env.PLEX_CONTAINER_TAG }}
+        echo "Saved image: ${{ env.PLEX_CONTAINER }}:${{ env.PLEX_CONTAINER_TAG }}"
 
     - name: Load PMS Docker image
       if: steps.docker-cache.outputs.cache-hit == 'true'
       run: |
-        docker load -i ~/.cache/docker/pms-docker-${{ env.PLEX_CONTAINER_TAG }}.tar
+        docker load -i ~/.cache/docker/${{ env.PLEX_CONTAINER }}-${{ env.PLEX_CONTAINER_TAG }}.tar
 
     - name: Set Plex token
       if: matrix.plex == 'claimed'
