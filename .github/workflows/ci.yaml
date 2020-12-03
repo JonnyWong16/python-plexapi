@@ -112,7 +112,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.cache/docker
-        key: ${{ runner.os }}-docker-pms-${{ steps.docker-digest.outputs.digest }}-x
+        key: ${{ runner.os }}-docker-pms-${{ steps.docker-digest.outputs.digest }}
 
     - name: Pull PMS Docker image
       if: steps.docker-cache.outputs.cache-hit != 'true'
